@@ -1,0 +1,123 @@
+@font-face {
+ font-family: ABCSansNovaRegular;
+ src: url(../fonts/ABCSansNova-Regular.otf);
+}
+@font-face {
+ font-family: ABCSansNovaBlack;
+ src: url(../fonts/ABCSansNova-Black.otf);
+}
+@font-face {
+ font-family: ABCSansNovaLight;
+ src: url(../fonts/ABCSansNova-Light.otf);
+}
+:root {
+  font-size: 1em;
+  font-family: ABCSansNovaRegular, Helvetica, sans-serif;
+  color: #001533;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+#container {
+  position: fixed;
+  top: 1.5rem;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-flow: column;
+}
+#header {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  text-align: center;
+  font-family: ABCSansNovaBlack, "Arial Black", Helvetica, sans-serif;
+}
+#subhead {
+  text-align: center;
+  color: #68788e;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+#chartLabel {
+  border: solid 1px #8495a9;
+  border-radius: 5px;
+  padding: 5px 10px;
+  text-transform: uppercase;
+  width: 475px;
+  margin: 0 .5rem;
+  font-size: 1.25rem;
+  font-family: ABCSansNovaRegular, Helvetica, sans-serif;
+  color: #68788e;
+  text-align: center;
+  outline: none;
+  cursor: pointer;
+}
+#chartLabel option {
+  background: #8495a9;
+  color: white;
+}
+.nav {
+  border: solid 1px #8495a9;
+  border-radius: 5px;
+  padding: 5px 10px;
+  pointer-events: all;
+  cursor: pointer;
+}
+.nav.limit {
+  pointer-events: none;
+  color: rgba(104, 120, 142, .25);
+}
+#footer {
+  font-family: ABCSansNovaLight, "Arial Narrow", Helvetica, sans-serif;
+  margin-top: 1rem;
+  font-size: .8rem;
+  color: #888;
+  text-align: center;
+}
+#chart {
+  height: 100%;
+}
+.area circle {
+  fill: rgba(0, 157, 229, .33);
+  stroke: rgb(0, 157, 229);
+}
+.area.fringe circle {
+  fill: rgb(242, 109, 0, .67);
+  stroke: rgb(242, 109, 0);
+}
+#axisGroup {
+  opacity: 0;
+}
+.tick text {
+  fill: #68788e;
+  font-size: 1.1rem;
+}
+.tick line, .domain {
+  stroke: #68788e;
+}
+.tick line {
+  stroke-dasharray: 3 3;
+}
+.cell {
+  fill: rgba(0, 0, 0, 0);
+}
+.area text {
+  fill: #68788e;
+  font-size: .8rem;
+  text-anchor: middle;
+  display: none;
+}
+.area.active circle {
+  fill: gold;
+  stroke: #001533;
+}
+.area.active text {
+  display: block;
+}
+
+@media only screen and (max-width: 500px) {
+}

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-155991615-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag("js", new Date());
+      gtag("config", "UA-155991615-1");
+    </script>
+
+    <!-- metaphysics -->
+    <meta charset="utf-8">
+    <title>The northern fringes</title>
+    <meta name="author" content="Markus Mannheim">
+    <meta name="keywords" content="data, act, canberra, casey, taylor, moncrieff, jacka, hall, gungahlin">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- scripts -->
+    <script src="./resources/d3.v7.min.js"></script>
+    <link href="./resources/style.css" rel="stylesheet">
+    <link href="./resources/abcLogo64.png" rel="icon">
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="header">The northern fringes</div>
+      <div id="subhead">
+        <div class="nav limit" id="navLeft" onclick="nav(-1)">&#9664;</div>
+        <select id="chartLabel" onchange="selectChange()">location</select>
+        <div class="nav" id="navRight" onclick="nav(1)">&#9654;</div>
+      </div>
+      <svg id="chart">
+        <g id="chartGroup"></g>
+        <g id="axisGroup"></g>
+      </svg>
+      <div id="footer">Chart: Markus Mannheim | Sources: Australian Bureau of Statistics, Australian Taxation Office, ACT Environment, Planning and Sustainable Development Directorate</div>
+    </div>
+
+    <script>
+      // page elements, variables
+      container = d3.select("#container");
+      header = d3.select("#header");
+      subhead = d3.select("#subhead");
+      chartLabel = d3.select("#chartLabel");
+      navLeft = d3.select("#navLeft");
+      navRight = d3.select("#navRight");
+      footer = d3.select("#footer");
+      chart = d3.select("#chart");
+      chartGroup = d3.select("#chartGroup");
+      axisGroup = d3.select("#axisGroup");
+      loadTarget = document.querySelector("#footer");
+
+      // load the data
+      d3.csv("./data/data_clean.csv")
+        .then(function(data) {
+          loadedData = {
+            type: "FeatureCollection",
+            features: data
+              .map(function(d) {
+                let datum = {
+                  type: "Feature",
+                  geometry: {
+                    type: "Point",
+                    coordinates: [+d.lng, +d.lat]
+                  },
+                  properties: []
+                };
+                let keys = Object.keys(d);
+                for (i in keys) {
+                  if (!["area", "code", "lat", "lng"].includes(keys[i])) {
+                    let value = d[keys[i]] ? +d[keys[i]] : null;
+                    let format = (
+                      ["population", "population density", "median age"].includes(keys[i]) ? ",.0f" :
+                      ["median house price", "median income"].includes(keys[i]) ? "$,.0f" :
+                      ".0%"
+                    );
+                    datum.properties[keys[i]] = [value, format];
+                  }
+                }
+                datum.properties["area"] = d["area"];
+                return datum;
+              })
+          };
+          phases = Object.keys(loadedData.features[0].properties).filter(function(d) { return d !== "area"; });
+          phases.unshift("location");
+          phase = phases.indexOf("location");
+          options = chartLabel.selectAll("option")
+              .data(phases)
+            .enter().append("option")
+              .property("value", function(d, i) { return i; })
+              .text(function(d) { return d; });
+          loopTime = 1000;
+          intervalTime = 5;
+
+          // set up chart basics
+          scale = d3.scaleLinear();
+          axis = d3.axisBottom(scale)
+            .tickSizeOuter(0);
+          projection = d3.geoConicEqualArea()
+            .parallels([-26.293056, -44.293056])
+            .rotate([-149.126944, 0]);
+
+          // draw chart only after fonts are loaded
+          window.addEventListener("resize", resize);
+          observer = new IntersectionObserver(loadFrame, {
+            threshold: 1
+          });
+          loaded = false;
+          observer.observe(loadTarget);
+        });
+
+      function start() {
+        phaseData = loadedData.features.filter(function(d) {
+          if (phases[phase] == "location") {
+            return d;
+          } else {
+            return d.properties[phases[phase]][0];
+          }
+        });
+
+        if (phases[phase] !== "location") {
+          scale.domain(d3.extent(phaseData, function(d) { return d.properties[phases[phase]][0]; })).nice();
+        };
+
+        d3.selectAll(".fringe")
+          .raise();
+
+        resize();
+      }
+
+      function resize() {
+        // signal initial draw
+        loaded = true;
+
+        // chart dimensions
+        dimensions = chart.node().getBoundingClientRect();
+        width = dimensions.width;
+        height = dimensions.height;
+        mapMargin = { top: 15, right: 50, bottom: 30, left: 50 };
+        axisMargin = { top: height * 3 / 4, right: 50, left: 50 };
+        midLine = height / 2;
+        distortion = height / 16;
+        projection.fitExtent([
+          [mapMargin.left, mapMargin.top],
+          [width - mapMargin.right, height - mapMargin.bottom]
+        ], loadedData);
+        axisGroup.attr("transform", "translate(0, " + axisMargin.top + ")");
+
+        // draw chart
+        if (phases[phase] == "location") {
+          axisGroup.transition()
+            .duration(loopTime)
+            .style("opacity", 0);
+        } else {
+          scale.range([axisMargin.left, width - axisMargin.right]);
+          format = phaseData[0].properties[phases[phase]][1];
+          if (format == ".0%" && scale.domain()[1] < .04) format = ".1%";
+          axis.ticks(5, format);
+          axis.tickSizeInner(-height / 2)
+            .tickPadding(10);
+          axisGroup.transition()
+            .call(axis)
+            .duration(loopTime * 2)
+            .style("opacity", 1);
+        }
+
+        voronoi = d3.Delaunay.from(
+          phaseData,
+          function(d) {
+            if (phases[phase] == "location") {
+              return projection(d.geometry.coordinates)[0];
+            } else {
+              return scale(d.properties[phases[phase]][0]);
+            }
+          },
+          function(d) {
+            if (phases[phase] == "location") {
+              return projection(d.geometry.coordinates)[1];
+            } else {
+              return d3.randomNormal(midLine, distortion)();
+            }
+          }
+        ).voronoi([0, 0, width, height]);
+
+        areas = chartGroup
+          .selectAll(".area")
+            .data(phaseData, function(d) { return d.properties.area; });
+
+        areas.exit()
+          .transition()
+            .duration(loopTime)
+            .delay(function(d, i) { return i * intervalTime; })
+            .style("opacity", 0)
+          .remove();
+
+        enteringAreas = areas.enter()
+          .append("g")
+            .attr("class", function(d) {
+              return ["Casey", "Taylor", "Moncrieff", "Jacka", "Hall", "Ngunnawal", "Bonner", "Amaroo", "Forde"].includes(d.properties.area) ? "area fringe": "area";
+            })
+            .on("mouseover", hoverOn)
+            .on("mouseout", hoverOff);
+        enteringAreas.transition()
+          .duration(loopTime)
+          .delay(function(d, i) { return i * intervalTime; })
+          .style("opacity", 1);
+        enteringAreas.append("circle")
+          .attr("r", 0)
+          .attr("cx", function(d, i) { return voronoi.delaunay.points[i * 2]; })
+          .attr("cy", function(d, i) { return voronoi.delaunay.points[i * 2 + 1]; })
+          .transition()
+            .duration(loopTime)
+            .delay(function(d, i) { return i * intervalTime; })
+            .attr("r", (width < 500 ? 5 : 10));
+        enteringAreas.append("text")
+          .text(function(d) { return d.properties.area; })
+          .attr("x", function(d, i) { return voronoi.delaunay.points[i * 2]; })
+          .attr("y", function(d, i) { return voronoi.delaunay.points[i * 2 + 1] + (width < 500 ? 10 : 22); });
+        enteringAreas.append("path")
+          .classed("cell", true)
+          .attr("d", function(d, i) { return voronoi.renderCell(i); });
+
+        areas.select("circle")
+          .transition()
+            .duration(loopTime)
+            .delay(function(d, i) { return i * intervalTime; })
+            .attr("cx", function(d, i) { return voronoi.delaunay.points[i * 2]; })
+            .attr("cy", function(d, i) { return voronoi.delaunay.points[i * 2 + 1]; })
+            .attr("r", (width < 500 ? 5 : 10));
+        areas.select("text")
+          .transition()
+            .duration(loopTime)
+            .delay(function(d, i) { return i * intervalTime; })
+            .attr("x", function(d, i) { return voronoi.delaunay.points[i * 2]; })
+            .attr("y", function(d, i) { return voronoi.delaunay.points[i * 2 + 1] + (width < 500 ? 10 : 22); });
+        areas.select(".cell")
+          .attr("d", function(d, i) { return voronoi.renderCell(i); });
+      }
+
+      function hoverOn() {
+        d3.select(this)
+          .classed("active", true)
+          .raise();
+      }
+
+      function hoverOff() {
+        d3.select(this)
+          .classed("active", false);
+      }
+
+      function nav(change) {
+        phase = phase + change;
+        options.filter(function(d, i) { return i == phase; }).node().selected = true;
+        changeDisplay();
+      }
+
+      function selectChange() {
+        phase = +chartLabel.property("value");
+        changeDisplay();
+      }
+
+      function changeDisplay() {
+        d3.selectAll(".nav").classed("limit", false);
+        if (phase == 0) navLeft.classed("limit", true);
+        if (phase == phases.length - 1) navRight.classed("limit", true);
+        start();
+      }
+
+      function loadFrame(interactionObjects) {
+        interactionObjects.map(function(object) {
+          if (!loaded) {
+            if (document.fonts.status == "loaded") {
+              if (object.isIntersecting) {
+                start();
+              }
+            } else {
+              document.fonts.onloadingdone = start();
+            }
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
