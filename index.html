@@ -148,10 +148,10 @@
         dimensions = chart.node().getBoundingClientRect();
         width = dimensions.width;
         height = dimensions.height;
-        mapMargin = { top: 15, right: 50, bottom: 30, left: 50 };
-        axisMargin = { top: height * 3 / 4, right: 50, left: 50 };
+        mapMargin = width < 500 ? { top: 10, right: 25, bottom: 20, left: 25 } : { top: 15, right: 50, bottom: 30, left: 50 };
+        axisMargin = { top: height * 3 / 4, right: 25, left: 25 };
         midLine = height / 2;
-        distortion = height / 16;
+        distortion = width < 500 ? height / 24 : height / 16;
         projection.fitExtent([
           [mapMargin.left, mapMargin.top],
           [width - mapMargin.right, height - mapMargin.bottom]
@@ -223,11 +223,11 @@
           .transition()
             .duration(loopTime)
             .delay(function(d, i) { return i * intervalTime; })
-            .attr("r", (width < 500 ? 5 : 10));
+            .attr("r", (width < 500 ? 6 : 10));
         enteringAreas.append("text")
           .text(function(d) { return d.properties.area; })
           .attr("x", function(d, i) { return voronoi.delaunay.points[i * 2]; })
-          .attr("y", function(d, i) { return voronoi.delaunay.points[i * 2 + 1] + (width < 500 ? 10 : 22); });
+          .attr("y", function(d, i) { return voronoi.delaunay.points[i * 2 + 1] + (width < 500 ? 16 : 22); });
         enteringAreas.append("path")
           .classed("cell", true)
           .attr("d", function(d, i) { return voronoi.renderCell(i); });
@@ -238,13 +238,13 @@
             .delay(function(d, i) { return i * intervalTime; })
             .attr("cx", function(d, i) { return voronoi.delaunay.points[i * 2]; })
             .attr("cy", function(d, i) { return voronoi.delaunay.points[i * 2 + 1]; })
-            .attr("r", (width < 500 ? 5 : 10));
+            .attr("r", (width < 500 ? 6 : 10));
         areas.select("text")
           .transition()
             .duration(loopTime)
             .delay(function(d, i) { return i * intervalTime; })
             .attr("x", function(d, i) { return voronoi.delaunay.points[i * 2]; })
-            .attr("y", function(d, i) { return voronoi.delaunay.points[i * 2 + 1] + (width < 500 ? 10 : 22); });
+            .attr("y", function(d, i) { return voronoi.delaunay.points[i * 2 + 1] + (width < 500 ? 16 : 22); });
         areas.select(".cell")
           .attr("d", function(d, i) { return voronoi.renderCell(i); });
       }

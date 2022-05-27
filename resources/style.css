@@ -120,4 +120,39 @@ body {
 }
 
 @media only screen and (max-width: 500px) {
+  #container {
+    top: 1rem;
+    bottom: 1rem;
+    left: .5rem;
+    right: .5rem;
+  }
+  #header {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+  }
+  #subhead {
+    font-size: 1rem;
+    margin-bottom: .5rem;
+  }
+  #chartLabel {
+    border-radius: 3px;
+    padding: 3px 5px;
+    width: 100%;
+    margin: 0 .25rem;
+    font-size: .9rem;
+  }
+  .nav {
+    border-radius: 3px;
+    padding: 3px 6px;
+  }
+  #footer {
+    margin-top: .5rem;
+    font-size: .7rem;
+  }
+  .tick text {
+    font-size: .7rem;
+  }
+  .area text {
+    font-size: .7rem;
+  }
 }
