@@ -12,14 +12,14 @@
 
     <!-- metaphysics -->
     <meta charset="utf-8">
-    <title>The northern fringes</title>
+    <title>Comparing Canberra</title>
     <meta name="author" content="Markus Mannheim">
-    <meta name="keywords" content="data, act, canberra, casey, taylor, moncrieff, jacka, hall, gungahlin">
+    <meta name="keywords" content="data, act, canberra, data, small, areas, sa2, census, suburbs">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- stuff for scrapers -->
-    <meta property="og:title" content="The northern fringes">
-    <meta property="og:description" content="Visualising and comparing Canberra suburb data.">
+    <meta property="og:title" content="Comparing Canberra">
+    <meta property="og:description" content="Visualising and comparing small areas in the ACT.">
     <meta property="og:image" content="https://markusmannheim.github.io/regional-data-explorer/resources/ogImage.jpg">
     <meta property="og:url" content="https://markusmannheim.github.io/regional-data-explorer/">
     <meta property="og:type" content="website">
@@ -35,7 +35,7 @@
 
   <body>
     <div id="container">
-      <div id="header">The northern fringes</div>
+      <div id="header">Comparing Canberra</div>
       <div id="subhead">
         <div class="nav limit" id="navLeft" onclick="nav(-1)">&#9664;</div>
         <select id="chartLabel" onchange="selectChange()">location</select>
@@ -45,6 +45,44 @@
         <g id="chartGroup"></g>
         <g id="axisGroup"></g>
       </svg>
+      <div id="keys">
+        <div class="key Belconnen">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">Belconnen</div>
+        </div>
+        <div class="key Gungahlin">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">Gungahlin</div>
+        </div>
+        <div class="key Molonglo">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">Molonglo</div>
+        </div>
+        <div class="key NorthCanberra">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">North Canberra</div>
+        </div>
+        <div class="key SouthCanberra">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">South Canberra</div>
+        </div>
+        <div class="key Tuggeranong">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">Tuggeranong</div>
+        </div>
+        <div class="key WestonCreek">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">Weston Creek</div>
+        </div>
+        <div class="key Woden">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">Woden</div>
+        </div>
+        <div class="key other">
+          <div class="keyBullet"></div>
+          <div class="keyLabel">other</div>
+        </div>
+      </div>
       <div id="footer">Chart: Markus Mannheim | Notes: House block sizes as of 2022; population and age profiles from 2021; housing prices from 2020; income data from 2018-19; other demographic data from the 2016 census | Sources: Australian Bureau of Statistics, Australian Taxation Office, ACT Environment, Planning and Sustainable Development Directorate</div>
     </div>
 
@@ -79,7 +117,7 @@
                 };
                 let keys = Object.keys(d);
                 for (i in keys) {
-                  if (!["area", "code", "lat", "lng"].includes(keys[i])) {
+                  if (!["area", "district", "code", "lat", "lng"].includes(keys[i])) {
                     let value = d[keys[i]] ? +d[keys[i]] : null;
                     let format = (
                       ["population", "population density", "median age"].includes(keys[i]) ? ",.0f" :
@@ -89,11 +127,12 @@
                     datum.properties[keys[i]] = [value, format];
                   }
                 }
+                datum.properties["district"] = d["district"];
                 datum.properties["area"] = d["area"];
                 return datum;
               })
           };
-          phases = Object.keys(loadedData.features[0].properties).filter(function(d) { return d !== "area"; });
+          phases = Object.keys(loadedData.features[0].properties).filter(function(d) { return d !== "area" && d !== "district"; });
           phases.unshift("location");
           phase = phases.indexOf("location");
           options = chartLabel.selectAll("option")
@@ -149,7 +188,7 @@
         width = dimensions.width;
         height = dimensions.height;
         mapMargin = width < 500 ? { top: 10, right: 25, bottom: 20, left: 25 } : { top: 15, right: 50, bottom: 30, left: 50 };
-        axisMargin = { top: height * 3 / 4, right: 25, left: 25 };
+        axisMargin = { top: height * 3 / 4, right: 50, left: 50 };
         midLine = height / 2;
         distortion = width < 500 ? height / 24 : height / 16;
         projection.fitExtent([
@@ -208,7 +247,7 @@
         enteringAreas = areas.enter()
           .append("g")
             .attr("class", function(d) {
-              return ["Casey", "Taylor", "Moncrieff", "Jacka", "Hall", "Ngunnawal", "Bonner", "Amaroo", "Forde"].includes(d.properties.area) ? "area fringe": "area";
+              return "area " + d.properties.district.replace(" ", "");
             })
             .on("mouseover", hoverOn)
             .on("mouseout", hoverOff);

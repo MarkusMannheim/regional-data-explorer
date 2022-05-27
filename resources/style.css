@@ -73,7 +73,7 @@ body {
 }
 #footer {
   font-family: ABCSansNovaLight, "Arial Narrow", Helvetica, sans-serif;
-  margin-top: 1rem;
+  margin-top: 3rem;
   font-size: .8rem;
   color: #888;
   text-align: center;
@@ -81,13 +81,124 @@ body {
 #chart {
   height: 100%;
 }
-.area circle {
-  fill: rgba(0, 157, 229, .33);
+.area.SouthCanberra circle {
+  fill: rgb(0, 157, 229, .33);
   stroke: rgb(0, 157, 229);
 }
-.area.fringe circle {
-  fill: rgb(242, 109, 0, .67);
+.area.Woden circle {
+  fill: rgb(242, 109, 0, .33);
   stroke: rgb(242, 109, 0);
+}
+.area.NorthCanberra circle {
+  fill: rgb(45, 130, 137, .33);
+  stroke: rgb(45, 130, 137);
+}
+.area.Belconnen circle {
+  fill: rgba(0, 35, 139, .33);
+  stroke: rgb(0, 35, 139);
+}
+.area.Gungahlin circle {
+  fill: rgb(202, 77, 72, .33);
+  stroke: rgb(202, 77, 72);
+}
+.area.Tuggeranong circle {
+  fill: rgb(100, 80, 179, .33);
+  stroke: rgb(100, 80, 179);
+}
+.area.WestonCreek circle {
+  fill: rgb(81, 168, 2, .33);
+  stroke: rgb(81, 168, 2);
+}
+.area.Molonglo circle {
+  fill: rgb(204, 133, 0, .33);
+  stroke: rgb(204, 133, 0);
+}
+.area.other circle {
+  fill: rgb(132, 149, 169, .33);
+  stroke: rgb(132, 149, 169);
+}
+#keys {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+.key {
+  margin-right: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  display: flex;
+}
+.key:last-child {
+  margin-right: 0;
+}
+.key .keyBullet {
+  border-radius: 50%;
+  margin-right: .5rem;
+  height: 1.1rem;
+  width: 1.1rem;
+}
+.key.SouthCanberra .keyBullet {
+  background: rgb(0, 157, 229, .33);
+  border: solid 1px #037cc2;
+}
+.key.SouthCanberra .keyLabel {
+  color: #037cc2;
+}
+.key.Woden .keyBullet {
+  background: rgb(242, 109, 0, .33);
+  border: solid 1px #cc4e00;
+}
+.key.Woden .keyLabel {
+  color: #cc4e00;
+}
+.key.NorthCanberra .keyBullet {
+  background: rgb(45, 130, 137, .33);
+  border: solid 1px rgb(45, 130, 137);
+}
+.key.NorthCanberra .keyLabel {
+  color: rgb(45, 130, 137);
+}
+.key.Belconnen .keyBullet {
+  background: rgba(0, 35, 139, .33);
+  border: solid 1px rgb(0, 35, 139);
+}
+.key.Belconnen .keyLabel {
+  color: rgb(0, 35, 139);
+}
+.key.Gungahlin .keyBullet {
+  background: rgb(202, 77, 72, .33);
+  border: solid 1px rgb(202, 77, 72);
+}
+.key.Gungahlin .keyLabel {
+  color: rgb(202, 77, 72);
+}
+.key.Tuggeranong .keyBullet {
+  background: rgb(100, 80, 179, .33);
+  border: solid 1px rgb(100, 80, 179);
+}
+.key.Tuggeranong .keyLabel {
+  color: rgb(100, 80, 179);
+}
+.key.WestonCreek .keyBullet {
+  background: rgb(81, 168, 2, .33);
+  border: solid 1px rgb(81, 168, 2);
+}
+.key.WestonCreek .keyLabel {
+  color: rgb(81, 168, 2);
+}
+.key.Molonglo .keyBullet {
+  background: rgb(204, 133, 0, .33);
+  border: solid 1px rgb(204, 133, 0);
+}
+.key.Molonglo .keyLabel {
+  color: rgb(204, 133, 0);
+}
+.key.other .keyBullet {
+  background: rgb(132, 149, 169, .33);
+  border: solid 1px rgb(132, 149, 169);
+}
+.key.other .keyLabel {
+  color: rgb(132, 149, 169);
 }
 #axisGroup {
   opacity: 0;
@@ -146,7 +257,7 @@ body {
     padding: 3px 6px;
   }
   #footer {
-    margin-top: .5rem;
+    margin-top: 1.5rem;
     font-size: .7rem;
   }
   .tick text {
@@ -154,5 +265,20 @@ body {
   }
   .area text {
     font-size: .7rem;
+  }
+  #keys {
+    margin-top: .5rem;
+    flex-flow: wrap;
+  }
+  .key {
+    margin-right: .5rem;
+    margin-bottom: .25rem;
+    font-weight: normal;
+    font-size: .8rem;
+  }
+  .key .keyBullet {
+    margin-right: .25rem;
+    height: .8rem;
+    width: .8rem;
   }
 }
