@@ -117,10 +117,16 @@ body {
   fill: rgb(132, 149, 169, .33);
   stroke: rgb(132, 149, 169);
 }
+.area.inert circle {
+  fill: rgb(104, 120, 142, .05);
+  stroke: rgb(104, 120, 142, .25);
+}
 #keys {
   margin-top: 1rem;
   display: flex;
   justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 .key {
   margin-right: 1rem;
@@ -199,6 +205,13 @@ body {
 }
 .key.other .keyLabel {
   color: rgb(132, 149, 169);
+}
+.key.inert .keyBullet {
+  background: rgba(104, 120, 142, .15);
+  border: solid 1px rgb(104, 120, 142, .5);
+}
+.key.inert .keyLabel {
+  color: rgb(104, 120, 142, .5);
 }
 #axisGroup {
   opacity: 0;

@@ -45,44 +45,7 @@
         <g id="chartGroup"></g>
         <g id="axisGroup"></g>
       </svg>
-      <div id="keys">
-        <div class="key Belconnen">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">Belconnen</div>
-        </div>
-        <div class="key Gungahlin">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">Gungahlin</div>
-        </div>
-        <div class="key Molonglo">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">Molonglo</div>
-        </div>
-        <div class="key NorthCanberra">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">North Canberra</div>
-        </div>
-        <div class="key SouthCanberra">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">South Canberra</div>
-        </div>
-        <div class="key Tuggeranong">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">Tuggeranong</div>
-        </div>
-        <div class="key WestonCreek">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">Weston Creek</div>
-        </div>
-        <div class="key Woden">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">Woden</div>
-        </div>
-        <div class="key other">
-          <div class="keyBullet"></div>
-          <div class="keyLabel">other</div>
-        </div>
-      </div>
+      <div id="keys"></div>
       <div id="footer">Chart: Markus Mannheim | Notes: House block sizes as of 2022; population and age profiles from 2021; housing prices from 2020; income data from 2018-19; other demographic data from the 2016 census | Sources: Australian Bureau of Statistics, Australian Taxation Office, ACT Environment, Planning and Sustainable Development Directorate</div>
     </div>
 
@@ -94,11 +57,13 @@
       chartLabel = d3.select("#chartLabel");
       navLeft = d3.select("#navLeft");
       navRight = d3.select("#navRight");
+      keys = d3.select("#keys");
       footer = d3.select("#footer");
       chart = d3.select("#chart");
       chartGroup = d3.select("#chartGroup");
       axisGroup = d3.select("#axisGroup");
       loadTarget = document.querySelector("#footer");
+      highlighted = false;
 
       // load the data
       d3.csv("./data/data_clean.csv")
@@ -132,16 +97,33 @@
                 return datum;
               })
           };
+          districts = Array.from(new Set(loadedData.features.map(function(d) { return d.properties.district; })));
+          districts.splice(districts.indexOf("other"), 1);
+          districts.push("other");
           phases = Object.keys(loadedData.features[0].properties).filter(function(d) { return d !== "area" && d !== "district"; });
           phases.unshift("location");
           phase = phases.indexOf("location");
+          loopTime = 1000;
+          intervalTime = 5;
+
+          // fill in fields
           options = chartLabel.selectAll("option")
               .data(phases)
             .enter().append("option")
               .property("value", function(d, i) { return i; })
               .text(function(d) { return d; });
-          loopTime = 1000;
-          intervalTime = 5;
+
+          keyFields = keys
+            .selectAll(".key")
+              .data(districts)
+            .enter().append("div")
+              .attr("class", function(d) { return d.replace(" ", "") + " key"; })
+              .on("click", keyToggle);
+          keyFields.append("div")
+            .classed("keyBullet", true);
+          keyFields.append("div")
+            .classed("keyLabel", true)
+            .text(function(d) { return d; });
 
           // set up chart basics
           scale = d3.scaleLinear();
@@ -188,7 +170,7 @@
         width = dimensions.width;
         height = dimensions.height;
         mapMargin = width < 500 ? { top: 10, right: 25, bottom: 20, left: 25 } : { top: 15, right: 50, bottom: 30, left: 50 };
-        axisMargin = { top: height * 3 / 4, right: 50, left: 50 };
+        axisMargin = width < 500 ? { top: height * 4 / 5, right: 40, left: 40 } : { top: height * 3 / 4, right: 50, left: 50 };
         midLine = height / 2;
         distortion = width < 500 ? height / 24 : height / 16;
         projection.fitExtent([
@@ -207,7 +189,7 @@
           format = phaseData[0].properties[phases[phase]][1];
           if (format == ".0%" && scale.domain()[1] < .04) format = ".1%";
           axis.ticks(5, format);
-          axis.tickSizeInner(-height / 2)
+          axis.tickSizeInner((width < 500 ? -height * .6 : -height * .5))
             .tickPadding(10);
           axisGroup.transition()
             .call(axis)
@@ -247,7 +229,11 @@
         enteringAreas = areas.enter()
           .append("g")
             .attr("class", function(d) {
-              return "area " + d.properties.district.replace(" ", "");
+              if (highlighted && d.properties.district !== highlighted) {
+                return "area inert " + d.properties.district.replace(" ", "");  
+              } else {
+                return "area " + d.properties.district.replace(" ", "");
+              }
             })
             .on("mouseover", hoverOn)
             .on("mouseout", hoverOff);
@@ -329,6 +315,22 @@
             }
           }
         });
+      }
+
+      function keyToggle(event, d) {
+        let district = d;
+        if (district == highlighted) {
+          highlighted = false;
+          keyFields.classed("inert", false);
+          d3.selectAll(".area").classed("inert", false);
+        } else {
+          highlighted = district;
+          keyFields.classed("inert", true);
+          d3.selectAll(".area").classed("inert", true)
+            .filter(function(d) { return d.properties.district == district; })
+              .classed("inert", false);
+          d3.select(this).classed("inert", false);
+        }
       }
     </script>
   </body>
